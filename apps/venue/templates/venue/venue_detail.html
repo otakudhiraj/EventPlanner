@@ -61,19 +61,23 @@
 
                             {% if venue.owner.email %}
                                 <li><strong>Email:</strong><a href="mailto:{{ venue.owner.email }}"
-                                                               class="text-blue-600">{{ venue.owner.email }}</a></li>
+                                                              class="text-blue-600">{{ venue.owner.email }}</a></li>
                             {% endif %}
                             {% if venue.location_text %}
                                 <li><strong>Venue Address:</strong> {{ venue.location_text }}</li>
                             {% endif %}
                         </ul>
 
-                        <div class="mt-4">
-                            <a data-veg-price={{ venue.get_veg_price }} data-non-veg-price={{ venue.get_non_veg_price }} id="bookNowBtn"
-                               class="inline-block px-5 py-3 bg-primary text-white font-semibold cursor-pointer rounded-lg shadow hover:bg-primary-700 transition">
-                                Book Now
-                            </a>
-                        </div>
+
+                        {% if venue.has_price %}
+                            <div class="mt-4">
+                                <a data-veg-price="{{ venue.get_veg_price }}" data-non-veg-price="{{ venue.get_non_veg_price }}"
+                                   id="bookNowBtn"
+                                   class="inline-block px-5 py-3 bg-primary text-white font-semibold cursor-pointer rounded-lg shadow hover:bg-primary-700 transition">
+                                    Book Now
+                                </a>
+                            </div>
+                        {% endif %}
                     </div>
 
                     <!-- Embedded Map -->
@@ -115,7 +119,7 @@
             {% endif %}
         </div>
 
-        {% if venue.images %}
+        {% if venue.images.exists %}
             <div class="my-5">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">Gallery</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

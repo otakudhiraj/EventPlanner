@@ -1,7 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission
-from apps.venue.models import VenueModel, Price, City, VenueImages
+from apps.venue.models import VenueModel, Price, City, VenueImages, BookingModel
 
 
 class Command(BaseCommand):
@@ -21,6 +21,7 @@ class Command(BaseCommand):
             Price: ['add_price', 'change_price', 'delete_price', 'view_price'],
             City: ['add_city', 'view_city'],
             VenueImages: ['add_venueimages', 'change_venueimages', 'delete_venueimages', 'view_venueimages'],
+            BookingModel: ['view_bookingmodel', 'change_bookingmodel'],
         }
 
         for model, codenames in models_and_codenames.items():

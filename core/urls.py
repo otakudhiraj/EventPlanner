@@ -18,6 +18,11 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
+
+admin.site.site_title = "Event Planner"
+admin.site.site_header = "Event Planner Dashboard"
+admin.site.index_title = "Welcome to Event Planner"
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),

@@ -2,11 +2,11 @@
     <div class="max-w-screen-xl mx-auto">
         <!-- Header List -->
         <div class="flex gap-8 font-semibold text-lg">
-            <div class="border-b-2 border-white pb-1">Venue</div>
-            <div class="hover:border-b-2 hover:border-white cursor-pointer">Transportation</div>
-            <div class="hover:border-b-2 hover:border-white cursor-pointer">Car Decoration</div>
-            <div class="hover:border-b-2 hover:border-white cursor-pointer">Photographer</div>
-            <div class="hover:border-b-2 hover:border-white cursor-pointer">Bus Rent</div>
+            <a href="{% url 'home:index' %}" class="border-b-2 border-white pb-1">Venue</a>
+            <a href="{% url 'home:transportation' %}" class="hover:border-b-2 hover:border-white cursor-pointer">Transportation</a>
+            <a href="{% url 'home:car-decoration' %}" class="hover:border-b-2 hover:border-white cursor-pointer">Car Decoration</a>
+            <a href="{% url 'home:photographer' %}" class="hover:border-b-2 hover:border-white cursor-pointer">Photographer</a>
+            <a href="{% url 'home:bus-rent' %}" class="hover:border-b-2 hover:border-white cursor-pointer">Bus Rent</a>
         </div>
     </div>
 </div>

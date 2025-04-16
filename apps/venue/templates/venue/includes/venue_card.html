@@ -2,8 +2,8 @@
 
 <div class="pListItem bg-white rounded-xl shadow-lg overflow-hidden transform transition duration-300 hover:shadow-2xl hover:-translate-y-1">
     <img src="
-    {% if obj.image %}
-        {{ obj.image.url }}
+    {% if obj.thumbnail_image %}
+        {{ obj.thumbnail_image.url }}
     {% else %}
         {% static 'images/venue.jpg' %}
     {% endif %}"

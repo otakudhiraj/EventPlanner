@@ -1,22 +1,34 @@
 <div id="bookingModal" class="fixed inset-0 flex items-center justify-center bg-black/30 hidden overflow-hidden z-50">
-    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
         <h2 class="text-xl font-semibold text-gray-800 mb-4">Book Your Venue</h2>
 
-        <form id="bookingForm" action="{% url 'venue:booking' venue.id %}" method="post">
+        <form id="bookingForm" method="post" action="{% url 'venue:booking' venue.id %}">
             {% csrf_token %}
             <input type="hidden" name="venue" value="{{ venue.id }}" />
             <input type="hidden" name="user" value="{{ user.id }}" />
 
             <div class="mb-4">
                 <label for="total_people" class="block text-gray-700">Total People</label>
+                <div class="error-message text-red-500 text-sm mb-2" id="total_people_error"></div>
                 <input type="number" id="total_people" name="total_people" class="w-full p-2 border rounded-lg" required min="1">
             </div>
 
             <div class="mb-4">
+                <label for="id_booked_for" class="block text-gray-700">Booking Date</label>
+                <div class="error-message text-red-500 text-sm mb-2" id="booked_for_error"></div>
+                <input type="date" id="id_booked_for" name="booked_for" class="w-full p-2 border rounded-lg" required>
+            </div>
+
+            <div class="mb-4">
                 <label for="meal_type" class="block text-gray-700">Meal Type</label>
+                <div class="error-message text-red-500 text-sm mb-2" id="meal_type_error"></div>
                 <select id="meal_type" name="meal_type" class="w-full p-2 border rounded-lg" required>
-                    <option value="Vegetarian">Vegetarian</option>
-                    <option value="Non-Vegetarian">Non-Vegetarian</option>
+                    {% if venue.get_veg_price %}
+                        <option value="Vegetarian">Vegetarian</option>
+                    {% endif %}
+                    {% if venue.get_non_veg_price %}
+                        <option value="Non-Vegetarian">Non-Vegetarian</option>
+                    {% endif %}
                 </select>
             </div>
 
@@ -33,7 +45,7 @@
             </div>
 
             <div class="flex justify-end">
-                <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                <button type="submit" id="bookingSubmit" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                     Confirm Booking
                 </button>
             </div>

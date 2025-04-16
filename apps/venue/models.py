@@ -51,7 +51,6 @@ class VenueModel(AbstractSlugModel):
     location_text = models.CharField(max_length=300, null=True, blank=True)
     location_embed = models.TextField(null=True, blank=True)
 
-    available_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -71,6 +70,11 @@ class VenueModel(AbstractSlugModel):
         if qs:
             return qs.price
         return None
+
+    @property
+    def has_price(self):
+        qs = Price.objects.filter(venue=self)
+        return qs.exists()
 
 
 class Price(models.Model):
@@ -94,8 +98,9 @@ class BookingModel(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="bookings")
     total_people = models.PositiveIntegerField(default=0)
     meal_type = models.CharField(choices=FoodType.choices, default=FoodType.VEG, max_length=20)
-    booked_at = models.DateTimeField(auto_now_add=True)
+    booked_at = models.DateField(auto_now_add=True)
     is_paid = models.BooleanField(default=False)
+    booked_for = models.DateField(null=True, blank=True)
 
     @property
     def get_total_payment_amount(self):
@@ -110,5 +115,11 @@ class BookingModel(models.Model):
             return "Not Paid"
 
     def __str__(self):
-        return f"{self.venue.name} - {self.user.username} - Booking"
-
+        if self.user:
+            try:
+                return f"{self.venue.name} - {self.user.username} - Booking"
+            except:
+                return f"{self.user.username} - Booking"
+        else:
+            return "User has been deleted"
+        return f"{self.venue.name} - Booking"

@@ -16,7 +16,10 @@
                             Venue
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Date
+                            Booked At
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Booked For
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             People
@@ -45,6 +48,9 @@
                                 {{ booking.booked_at|date:"M d, Y" }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ booking.booked_for|date:"M d, Y" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {{ booking.total_people }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -63,9 +69,12 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 {% if not booking.is_pad %}
                                     <button onclick="showPaymentModal('{{ booking.id }}', '{{ booking.get_total_payment_amount }}')"
-                                            class="text-blue-600 hover:text-blue-900 mr-4">Pay Now
+                                            class="text-blue-600 hover:text-blue-900 mr-4 cursor-pointer">Pay Now
                                     </button>
                                 {% endif %}
+                                <button onclick="cancelBooking('{{ booking.id }}')"
+                                            class="text-red-600 hover:text-red-900 mr-4 cursor-pointer">Cancel
+                                </button>
                             </td>
                         </tr>
                     {% empty %}

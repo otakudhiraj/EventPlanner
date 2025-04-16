@@ -3,8 +3,25 @@ from django import forms
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib import messages
 from django.contrib.auth.models import Group
+from tailwind.validate import ValidationError
+
 
 class UserProfileForm(forms.ModelForm):
+    password1 = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={
+            'class': 'w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary',
+            'placeholder': 'New Password',
+        })
+    )
+    password2 = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={
+            'class': 'w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary',
+            'placeholder': 'Confirm New Password',
+        })
+    )
+
     class Meta:
         model = get_user_model()
         fields = ['email', 'username', 'first_name', 'last_name', 'phone', 'profile_image']
@@ -28,12 +45,32 @@ class UserProfileForm(forms.ModelForm):
         self.fields['last_name'].widget.attrs['placeholder'] = 'Last Name'
         self.fields['phone'].widget.attrs['placeholder'] = 'Phone Number'
 
-    def clean_password(self):
-        return self.instance.password
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get('password1')
+        password2 = cleaned_data.get('password2')
+
+        if password1 or password2:
+            if password1 != password2:
+                raise ValidationError("Passwords do not match.")
+            if len(password1) < 8:
+                raise ValidationError("Password must be at least 8 characters long.")
+
+        return cleaned_data
 
     def clean_phone(self):
         phone = self.cleaned_data.get('phone')
         return phone
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        password = self.cleaned_data.get('password1')
+        if password:
+            user.set_password(password)
+        if commit:
+            user.save()
+        return user
+
 
 class UserRegisterForm(SignupForm):
     def __init__(self, *args, **kwargs):

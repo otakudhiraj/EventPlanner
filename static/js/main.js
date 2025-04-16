@@ -43,6 +43,38 @@ function removeAlertMessages() {
     }
 }
 
+function openModal(modal) {
+    let body = document.body;
+    modal.classList.remove('hidden');
+    body.style.overflow = 'hidden';
+    body.style.position = 'fixed';
+    body.style.width = '100%';
+}
+
+function clearFormAndErrors(bookingForm) {
+    bookingForm.reset();
+
+    const errorFields = bookingForm.querySelectorAll(".error-message");
+    errorFields.forEach((field) => {
+        field.textContent = "";
+    });
+
+    document.getElementById('pricePerPerson').textContent = "0.00";
+    document.getElementById('totalAmount').textContent = "0.00";
+}
+
+function closeModal(modal, bookingForm) {
+    let body = document.body;
+    if (bookingForm) {
+        clearFormAndErrors(bookingForm);
+    }
+    modal.classList.add('hidden');
+    body.style.overflow = '';
+    body.style.position = '';
+    body.style.width = '';
+}
+
+
 function bookNow(vegPrice, nonVegPrice) {
     const bookingModal = document.getElementById('bookingModal');
     const bookNowBtn = document.getElementById('bookNowBtn');
@@ -51,7 +83,7 @@ function bookNow(vegPrice, nonVegPrice) {
 
 
     closeModalBtn.addEventListener('click', function () {
-        closeModal(bookingModal);
+        closeModal(bookingModal, bookingForm);
     });
 
     const totalPeopleInput = document.getElementById('total_people');
@@ -83,6 +115,11 @@ function bookNow(vegPrice, nonVegPrice) {
     bookingForm.addEventListener('submit', async function (event) {
         event.preventDefault();
 
+        // Clear previous errors
+        document.getElementById("total_people_error").innerHTML = "";
+        document.getElementById("booked_for_error").innerHTML = "";
+        document.getElementById("meal_type_error").innerHTML = "";
+
         // Show loading state
         const submitButton = this.querySelector('button[type="submit"]');
         submitButton.disabled = true;
@@ -94,6 +131,7 @@ function bookNow(vegPrice, nonVegPrice) {
                 total_people: this.total_people.value,
                 meal_type: this.meal_type.value,
                 venue: this.venue.value,
+                booked_for: this.booked_for.value,
                 user: this.user.value
             };
 
@@ -102,24 +140,32 @@ function bookNow(vegPrice, nonVegPrice) {
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrfToken,
+                    'x-requested-with': 'XMLHttpRequest',
                 },
                 body: JSON.stringify(formData)
             });
 
             const data = await response.json();
-
             if (!response.ok) {
-                alert(data.errors || 'Booking failed');
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else if (data.errors) {
+                    for (let field in data.errors) {
+                        let errorMessage = data.errors[field];
+                        document.getElementById(field + "_error").innerHTML = errorMessage;
+                    }
+                } else {
+                    alert(data.errors || 'Booking failed');
+                }
+            } else {
+                closeModal(bookingModal, bookingForm);
             }
 
-            // Success handling
-            closeModal(bookingModal);
-
-            const paymentModal = document.getElementById('paymentModal');
-
-            openModal(paymentModal);
-            pay();
-
+            if (response.ok) {
+                const paymentModal = document.getElementById('paymentModal');
+                openModal(paymentModal);
+                pay();
+            }
         } catch (error) {
             console.error('Booking error:', error);
             alert(`Error: ${error.message}`);
@@ -127,26 +173,9 @@ function bookNow(vegPrice, nonVegPrice) {
             submitButton.disabled = false;
             submitButton.innerHTML = 'Confirm Booking';
         }
-
-        closeModal(bookingModal);
     });
 }
 
-function openModal(modal) {
-    let body = document.body;
-    modal.classList.remove('hidden');
-    body.style.overflow = 'hidden';
-    body.style.position = 'fixed';
-    body.style.width = '100%';
-}
-
-function closeModal(modal) {
-    let body = document.body;
-    modal.classList.add('hidden');
-    body.style.overflow = '';
-    body.style.position = '';
-    body.style.width = '';
-}
 
 function pay() {
     const paymentModal = document.querySelector("#paymentModal");
@@ -157,4 +186,18 @@ function pay() {
             closeModal(paymentModal);
         });
     });
+}
+
+async function cancelBooking(bookingId) {
+    const response = await fetch(`/venue/cancel-booking?id=${bookingId}`, {
+        method: 'GET'
+    });
+    const data = await response.json();
+
+    if (data.success) {
+        alert('Booking has been successfully cancelled!');
+        window.location.reload();
+    } else {
+        alert('Failed to cancel booking: ' + (data.message || 'Unknown error.'));
+    }
 }
