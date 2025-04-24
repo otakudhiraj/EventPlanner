@@ -67,7 +67,7 @@
                             </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                {% if not booking.is_pad %}
+                                {% if not booking.is_paid %}
                                     <button onclick="showPaymentModal('{{ booking.id }}', '{{ booking.get_total_payment_amount }}')"
                                             class="text-blue-600 hover:text-blue-900 mr-4 cursor-pointer">Pay Now
                                     </button>
@@ -88,7 +88,7 @@
         </div>
     </div>
 
-    <!-- Payment Modal (same as before but enhanced) -->
+    <!-- Payment Modal -->
     <div id="paymentModal"
          class="fixed inset-0 flex items-center justify-center bg-black/30 hidden overflow-hidden z-50">
         <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
