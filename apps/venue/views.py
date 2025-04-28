@@ -1,12 +1,17 @@
+import os
+
+import requests
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
 from django.views.generic import DetailView, TemplateView
 
+from apps.venue.constants import VenueBookingStatus, BookingStatus
 from apps.venue.forms import BookingForm
 from apps.venue.models import City, VenueModel, BookingModel
 import json
+
 
 # Create your views here.
 class CityDetail(DetailView):
@@ -27,6 +32,7 @@ class CityDetail(DetailView):
 
         return context
 
+
 class VenueDetail(DetailView):
     model = VenueModel
     context_object_name = 'venue'
@@ -44,6 +50,7 @@ class VenueDetail(DetailView):
         })
 
         return context
+
 
 class CityView(TemplateView):
     template_name = 'venue/cities.html'
@@ -76,6 +83,7 @@ class BookingView(LoginRequiredMixin, View):
 
         if booking_form.is_valid():
             booking = booking_form.save()
+
             return JsonResponse({
                 'success': True,
                 'booking_id': booking.id,
@@ -90,7 +98,8 @@ class BookingView(LoginRequiredMixin, View):
                 'errors': errors
             }, status=400)
 
-class CancelBookingView(View):
+
+class CancelBookingView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         booking_id = request.GET.get('id')
 
@@ -99,8 +108,52 @@ class CancelBookingView(View):
 
         try:
             booking = BookingModel.objects.get(id=booking_id)
-            booking.user = None
+            booking.status = BookingStatus.CANCELLED
             booking.save()
             return JsonResponse({'success': True, 'message': 'Booking successfully cancelled'})
         except BookingModel.DoesNotExist:
             return JsonResponse({'success': False, 'message': 'Booking not found'}, status=404)
+
+
+class PayBookingView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        booking_id = kwargs.get('id')
+
+        if not booking_id:
+            return JsonResponse({'success': False, 'message': 'No booking ID provided'}, status=400)
+
+        try:
+            booking = BookingModel.objects.get(id=booking_id)
+            booking.is_paid = True
+            booking.status = BookingStatus.PAID
+            booking.save()
+
+            url = "https://dev.khalti.com/api/v2/epayment/initiate/"
+
+            payload = json.dumps({
+                "return_url": "http://localhost:8000/venue/payment/success/",
+                "website_url": "https://localhost:8000/",
+                "amount": "1000",
+                "purchase_order_id": f"{booking.id}",
+                "purchase_order_name": f"Booking-{booking.id}",
+                "customer_info": {
+                    "name": request.user.username or "Ram Bahaadur",
+                    "email": request.user.email or "test@khalti.com",
+                    "phone": request.user.phone or "9800000001"
+                }
+            })
+
+            headers = {
+                'Authorization': f'key {os.getenv("KHALTI_LIVE_SECRET_KEY")}',
+                'Content-Type': 'application/json',
+            }
+
+            response = requests.request("POST", url, headers=headers, data=payload)
+
+            data = response.json()
+            return JsonResponse({'success': True, 'data': data})
+        except BookingModel.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Booking not found'}, status=404)
+
+class PaymentSuccessView(LoginRequiredMixin, TemplateView):
+    template_name = 'venue/payment_success.html'

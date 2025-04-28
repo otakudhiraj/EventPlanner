@@ -5,22 +5,17 @@
 
 {% block content %}
     <div class="max-w-7xl mx-auto p-6">
-        <!-- Breadcrumb -->
         {% include 'includes/breadcrumb.html' with url="/venue/city/"|add:venue.city.slug list=venue.city.name obj=venue %}
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <!-- Main Content -->
             <div class="md:col-span-3 space-y-10">
 
-                <!-- Section 1: Description & Image side by side -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                    <!-- Text -->
                     <div>
                         <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ venue.name }}</h1>
                         <p class="text-gray-700 mb-4">{{ venue.description }}</p>
                     </div>
 
-                    <!-- Image -->
                     <div>
                         {% if venue.thumbnail_image %}
                             <img src="{{ venue.thumbnail_image.url }}" alt="{{ venue.name }}"
@@ -32,9 +27,7 @@
                     </div>
                 </div>
 
-                <!-- Section 2: Details -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                    <!-- Venue Details -->
                     <div class="space-y-3">
                         <h2 class="text-xl font-semibold text-gray-800 mb-2">Venue Details</h2>
 
@@ -55,7 +48,9 @@
                             {% if venue.owner %}
                                 <li><strong>Owner:</strong> {{ venue.owner }}</li>
                             {% endif %}
-                            
+                            {% if venue.owner.phone %}
+                                <li><strong>Phone:</strong> {{ venue.owner.phone }}</li>
+                            {% endif %}
 
                             {% if venue.owner.email %}
                                 <li><strong>Email:</strong><a href="mailto:{{ venue.owner.email }}"
@@ -64,7 +59,11 @@
                             {% if venue.location_text %}
                                 <li><strong>Venue Address:</strong> {{ venue.location_text }}</li>
                             {% endif %}
+                            {% if venue.get_rating %}
+                                <li><strong>Venue Rating:</strong> {{ venue.get_rating }}/5</li>
+                            {% endif %}
                         </ul>
+
 
                         {% if venue.has_price %}
                             <div class="mt-4">
@@ -88,6 +87,32 @@
                     {% endif %}
                 </div>
             </div>
+
+            <!-- Sidebar: Related Venues -->
+            {% if related_venues %}
+                <aside>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">More Venues in {{ venue.city.name }}</h3>
+                    <ul class="space-y-3">
+                        {% for other_venue in related_venues %}
+                            <li>
+                                <a href="{% url 'venue:venue-detail' other_venue.slug %}"
+                                   class="flex items-center gap-3 p-3 bg-primary rounded-lg hover:bg-primary-700 transition">
+                                    {% if other_venue.image %}
+                                        <img src="{{ other_venue.image.url }}"
+                                             alt="{{ other_venue.name }}"
+                                             class="w-10 h-10 object-cover rounded-full shadow-sm">
+                                    {% else %}
+                                        <img src="{% static 'images/venue.jpg' %}"
+                                             alt="{{ other_venue.name }}"
+                                             class="w-10 h-10 object-cover rounded-full shadow-sm">
+                                    {% endif %}
+                                    <h4 class="font-medium text-white">{{ other_venue.name }}</h4>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </aside>
+            {% endif %}
         </div>
 
         {% if venue.images.exists %}
@@ -107,5 +132,6 @@
     </div>
 
     {% include "venue/includes/book_now_modal.html" %}
+
     {% include "venue/includes/payment_modal.html" %}
 {% endblock %}
