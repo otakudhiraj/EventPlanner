@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.db.models import Q
 from django.views.generic import TemplateView
 
-from apps.venue.constants import FoodType
+from apps.venue.constants import FoodType, VenueBookingStatus, BookingStatus
 from apps.venue.models import City, VenueModel, Price
 from django.db.models import Sum, Count, ExpressionWrapper, FloatField, F
 
@@ -53,7 +53,6 @@ class SearchView(TemplateView):
             min_price = Decimal(min_price) if min_price else None
             max_price = Decimal(max_price) if max_price else None
 
-            # Handle price filters directly without annotations
             if min_price and max_price:
                 qs = qs.filter(
                     Q(prices__price__gte=min_price, prices__price__lte=max_price) |
@@ -68,7 +67,7 @@ class SearchView(TemplateView):
             print("Price filter error:", e)
 
         if date:
-            qs = qs.exclude(bookings__booked_for=date)
+            qs = qs.exclude(venue_bookings__booked_for=date, venue_bookings__status=BookingStatus.PENDING)
 
         context.update({
             "venues": qs.distinct(),
@@ -82,7 +81,7 @@ class TransportationView(TemplateView):
 class CarDecorationView(TemplateView):
     template_name = 'home/car_decoration.html'
 
-class PhotograpView(TemplateView):
+class PhotographyView(TemplateView):
     template_name = 'home/photograph.html'
 
 class BusRentView(TemplateView):

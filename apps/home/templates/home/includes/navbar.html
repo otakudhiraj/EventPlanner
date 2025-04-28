@@ -1,5 +1,5 @@
 <div class="flex justify-center bg-primary p-4 bg-primary">
-    <div class="flex justify-between items-center max-w-screen-xl w-full px-4">
+    <div class="flex justify-between items-center max-w-screen-xl w-full">
 
         <a href="{% url 'home:index' %}" class="text-white text-2xl font-bold">
             <span class="logo">Event Planner</span>
@@ -10,7 +10,7 @@
                 <button class="flex items-center gap-2 text-white cursor-pointer" id="profile-dropdown-btn">
                     {% if request.user.profile_image %}
                         <div class="bg-white w-[30px] h-[30px] rounded-full overflow-hidden">
-                            <img src="{{ request.user.profile_image.url }}" alt="{{ request.user.get_full_name }}" class="rounded-full object-cover" />
+                            <img src="{{ request.user.profile_image.url }}" alt="{{ request.user.get_full_name }}" class="rounded-full object-cover w-[30px] h-[30px]" />
                         </div>
                     {% else %}
                         <i class="fas fa-user"></i>
@@ -27,6 +27,9 @@
                         </li>
                         <li>
                             <a href="{% url 'users:bookings' %}" class="block px-4 py-2 hover:bg-secondary hover:text-white">Bookings</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'users:recent_venues' %}" class="block px-4 py-2 hover:bg-secondary hover:text-white">Recent Venues</a>
                         </li>
                         <li>
                             <a href="{% url 'account_logout' %}" class="block px-4 py-2 hover:bg-secondary hover:text-white">Logout</a>
