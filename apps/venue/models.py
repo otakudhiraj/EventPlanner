@@ -81,8 +81,10 @@ class VenueModel(AbstractSlugModel):
         qs = VenueModel.objects.prefetch_related("ratings").annotate(
             avg_rating=Avg('ratings__rating')
         ).get(id=self.id)
-        return round(qs.avg_rating, 2)
-
+        if qs.avg_rating:
+            return round(qs.avg_rating, 2)
+        else:
+            return 0
 
 class VenueRatingModel(models.Model):
     user = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True)
@@ -115,7 +117,7 @@ class BookingModel(models.Model):
     booked_at = models.DateField(auto_now_add=True)
     is_paid = models.BooleanField(default=False)
     booked_for = models.DateField(null=True, blank=True)
-    status = models.CharField(max_length=25, choices=BookingStatus.choices, default=BookingStatus.PENDING, null=True, blank=True)
+    status = models.CharField(max_length=25, choices=BookingStatus.choices, default=BookingStatus.ONGOING, null=True, blank=True)
 
     @property
     def get_total_payment_amount(self):

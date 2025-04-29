@@ -4,6 +4,7 @@ import requests
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
 from django.views import View
 from django.views.generic import DetailView, TemplateView
 
@@ -125,14 +126,13 @@ class PayBookingView(LoginRequiredMixin, View):
         try:
             booking = BookingModel.objects.get(id=booking_id)
             booking.is_paid = True
-            booking.status = BookingStatus.PAID
             booking.save()
 
             url = "https://dev.khalti.com/api/v2/epayment/initiate/"
 
             payload = json.dumps({
-                "return_url": "http://localhost:8000/venue/payment/success/",
-                "website_url": "https://localhost:8000/",
+                "return_url": f"http://localhost:8000{reverse('venue:payment-success')}",
+                "website_url": "http://localhost:8000/",
                 "amount": "1000",
                 "purchase_order_id": f"{booking.id}",
                 "purchase_order_name": f"Booking-{booking.id}",

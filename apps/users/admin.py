@@ -39,7 +39,7 @@ class AuthUserAdmin(UserAdmin):
         urls = super().get_urls()
         custom_urls = [
             path(
-              '<int:user_id>/approve/>',
+              '<int:user_id>/approve/',
                 self.admin_site.admin_view(self.approve_vendor),
                 name="approve_vendor"
             ),

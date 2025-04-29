@@ -18,5 +18,4 @@ class VenueBookingStatus(TextChoices):
 class BookingStatus(TextChoices):
     CANCELLED = "Cancelled", "Cancelled"
     COMPLETED = "Completed", "Completed"
-    PENDING = "Pending", "Pending"
-    PAID = "Paid", "Paid"
+    ONGOING = "Ongoing", "Ongoing"

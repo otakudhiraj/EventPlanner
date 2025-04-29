@@ -38,18 +38,14 @@
                 successfully.</p>
 
             <div class="space-y-2 text-sm text-gray-600 mb-6">
-                <p><strong>Order ID:</strong> #{{ order_id|default:"123456" }}</p>
-                <p><strong>Amount:</strong> ${{ amount|default:"99.00" }}</p>
+                <p><strong>Order ID:</strong> #{{ request.GET.purchase_order_id|default:"123456" }}</p>
+                <p><strong>Amount:</strong> Rs. {{ requset.GET.total_amount|default:"99.00" }}</p>
             </div>
 
-            <a href="{% url 'home' %}"
+            <a href="{% url 'home:index' %}"
                class="inline-block bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-full transition">
                 Go to Home
             </a>
-
-            <div class="mt-6 text-xs text-gray-400">
-                You will receive a confirmation email shortly.
-            </div>
         </div>
     </div>
 {% endblock %}

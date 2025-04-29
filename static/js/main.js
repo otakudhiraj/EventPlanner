@@ -209,7 +209,6 @@ function pay(bookingId) {
     document.querySelectorAll('.payment-option').forEach(option => {
         option.addEventListener('click', async function () {
             const paymentMethod = this.textContent.trim();
-            alert(`Selected payment method: ${paymentMethod}`);
 
             if (paymentMethod === "Khalti") {
                 const response = await fetch(`http://localhost:8000/venue/pay-booking/${bookingId}/`);
@@ -221,7 +220,6 @@ function pay(bookingId) {
                 }
 
             }
-            closeModal(paymentModal);
         });
     });
 }
