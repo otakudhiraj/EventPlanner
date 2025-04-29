@@ -13,6 +13,33 @@ document.addEventListener('DOMContentLoaded', function () {
             bookNow(vegPrice, nonVegPrice);
         })
     }
+
+    const swiper = new Swiper('.swiper', {
+        direction: 'horizontal',
+
+        slidesPerView: 1,
+        breakpoints: {
+            640: {
+                slidesPerView: 2,
+                spaceBetween: 16,
+            },
+            1024: {
+                slidesPerView: 4,
+                spaceBetween: 24,
+            },
+        },
+        watchOverflow: true,
+
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        },
+
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+    });
 })
 
 
@@ -164,7 +191,7 @@ function bookNow(vegPrice, nonVegPrice) {
             if (response.ok) {
                 const paymentModal = document.getElementById('paymentModal');
                 openModal(paymentModal);
-                pay();
+                pay(data.booking_id);
             }
         } catch (error) {
             console.error('Booking error:', error);
@@ -177,13 +204,22 @@ function bookNow(vegPrice, nonVegPrice) {
 }
 
 
-function pay() {
+function pay(bookingId) {
     const paymentModal = document.querySelector("#paymentModal");
     document.querySelectorAll('.payment-option').forEach(option => {
-        option.addEventListener('click', function () {
+        option.addEventListener('click', async function () {
             const paymentMethod = this.textContent.trim();
-            alert(`Selected payment method: ${paymentMethod}`);
-            closeModal(paymentModal);
+
+            if (paymentMethod === "Khalti") {
+                const response = await fetch(`http://localhost:8000/venue/pay-booking/${bookingId}/`);
+                const jsonData = await response.json();
+                const data = jsonData.data;
+
+                if (jsonData.success && data?.payment_url) {
+                    window.location.href = data.payment_url;
+                }
+
+            }
         });
     });
 }

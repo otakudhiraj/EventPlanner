@@ -1,10 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django.utils.text import slugify
 
-from apps.venue.constants import FoodType
-
+from apps.venue.constants import FoodType, VenueBookingStatus, BookingStatus
 
 # Create your models here.
 User = get_user_model()
@@ -76,6 +76,22 @@ class VenueModel(AbstractSlugModel):
         qs = Price.objects.filter(venue=self)
         return qs.exists()
 
+    @property
+    def get_rating(self):
+        qs = VenueModel.objects.prefetch_related("ratings").annotate(
+            avg_rating=Avg('ratings__rating')
+        ).get(id=self.id)
+        if qs.avg_rating:
+            return round(qs.avg_rating, 2)
+        else:
+            return 0
+
+class VenueRatingModel(models.Model):
+    user = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True)
+    venue = models.ForeignKey(VenueModel, on_delete=models.SET_NULL, null=True, related_name="ratings")
+    rating = models.PositiveIntegerField(default=0, null=True, blank=True)
+    rated_at = models.DateTimeField(auto_now_add=True)
+
 
 class Price(models.Model):
     venue = models.ForeignKey(VenueModel, on_delete=models.SET_NULL, null=True, related_name="prices")
@@ -94,13 +110,14 @@ class VenueImages(models.Model):
         return f"{self.venue.name} - Image"
 
 class BookingModel(models.Model):
-    venue = models.ForeignKey(VenueModel, on_delete=models.SET_NULL, null=True, related_name="bookings")
+    venue = models.ForeignKey(VenueModel, on_delete=models.SET_NULL, null=True, related_name="venue_bookings")
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="bookings")
     total_people = models.PositiveIntegerField(default=0)
     meal_type = models.CharField(choices=FoodType.choices, default=FoodType.VEG, max_length=20)
     booked_at = models.DateField(auto_now_add=True)
     is_paid = models.BooleanField(default=False)
     booked_for = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=25, choices=BookingStatus.choices, default=BookingStatus.ONGOING, null=True, blank=True)
 
     @property
     def get_total_payment_amount(self):
@@ -120,6 +137,4 @@ class BookingModel(models.Model):
                 return f"{self.venue.name} - {self.user.username} - Booking"
             except:
                 return f"{self.user.username} - Booking"
-        else:
-            return "User has been deleted"
         return f"{self.venue.name} - Booking"
